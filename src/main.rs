@@ -8,12 +8,15 @@ curl -v https://login.salesforce.com/services/oauth2/token -d "client_id=3MVG9fT
 
 
 
+    Key:- Content-Type  | Value: application/JSON
+    Key:- Authorization  | Value: Bearer + access token. 
+
  */
 
  use std::collections::HashMap;
  use serde::{Deserialize, Serialize};
  use reqwest::header::CONTENT_TYPE;
- 
+ use reqwest::header::AUTHORIZATION;
  
  #[derive(Serialize, Deserialize, Debug)]
  struct GETAPIResponse {
@@ -34,6 +37,73 @@ curl -v https://login.salesforce.com/services/oauth2/token -d "client_id=3MVG9fT
     token_type: String,
     issued_at: String,
     signature: String,
+ }
+
+
+ #[derive(Serialize, Deserialize, Debug)]
+ struct LISTAPIResponse {
+    tooling: String,
+    metadata: String,
+    eclair: String,
+    folders: String,
+    #[serde(rename = "prechatForms")]
+    prechat_forms: String,
+    #[serde(rename = "contact-tracing")]
+    contact_tracing: String,
+    jsonxform: String,
+    chatter: String,
+    tabs: String,
+    #[serde(rename = "appMenu")]
+    app_menu: String,
+    #[serde(rename = "quickActions")]
+    quick_actions: String,
+    #[serde(rename = "queryAll")]
+    query_all: String,
+    commerce: String,
+    wave: String,
+    iot: String,
+    analytics: String,
+    search: String,
+    smartdatadiscovery: String,
+    identity: String,
+    composite: String,
+    #[serde(rename = "parameterizedSearch")]
+    parameterized_search: String,
+    fingerprint: String,
+    theme: String,
+    nouns: String,
+    domino: String,
+    event: String,
+    #[serde(rename = "serviceTemplates")]
+    service_templates: String,
+    recent: String,
+    connect: String,
+    licensing: String,
+    limits: String,
+    process: String,
+    dedupe: String,
+    #[serde(rename = "async-queries")]
+    async_queries: String,
+    //async-queries: String,
+    query: String,
+    jobs: String,
+    #[serde(rename = "match")]
+    match_api: String,
+    ai: String,
+    localizedvalue: String,
+    mobile: String,
+    #[serde(rename = "emailConnect")]
+    email_connect: String,
+    consent: String,
+    tokenizer: String,
+    #[serde(rename = "compactLayouts")]
+    compact_layouts: String,
+    #[serde(rename = "knowledgeManagement")]
+    knowledge_management: String,
+    sobjects: String,
+    actions: String,
+    support: String,
+    
  }
 
  #[tokio::main]
@@ -72,7 +142,20 @@ let resp_json = client.post("https://login.salesforce.com/services/oauth2/token"
     .json::<AUTHAPIResponse>()
     .await?;
 
-println!("{:#?}", resp_json);
+    println!("{:#?}", resp_json);
+    
+    let resp_json = client.get(format!("{}/services/data/v56.0", (resp_json.instance_url)))   
+    .header(CONTENT_TYPE, "application/json")
+    .header(AUTHORIZATION, format!("{} {}", resp_json.token_type, resp_json.access_token))
+    .send()
+    .await?
+//    .text().await?;
+    .json::<LISTAPIResponse>()
+    .await?;
+
+    println!("{:#?}", resp_json);
+
+
 
     Ok(())
 }
